@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ CHF 440 · Practical 3 · Wetting Behaviour of Powders ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Quicksand:wght@400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<style>
+:root {
+  --hot:     #ff2d78;
+  --pink:    #ff6eb4;
+  --blush:   #ffb3d1;
+  --baby:    #ffd6e8;
+  --cream:   #fff0f7;
+  --gold:    #ffd700;
+  --rose:    #ff8fab;
+  --lilac:   #e8b4f8;
+  --mint:    #b8f0e6;
+  --white:   #ffffff;
+  --deep:    #2d0a1e;
+  --serif:   'Playfair Display', serif;
+  --fun:     'Quicksand', sans-serif;
+  --script:  'Dancing Script', cursive;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1a0010;
+  font-family: var(--fun);
+  overflow-x: hidden;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ctext y='20' font-size='20'%3E✨%3C/text%3E%3C/svg%3E") 12 12, auto;
+}
+
+/* ─── GLITTER CANVAS ─────────────────────────────────────── */
+#glitter {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── BG GRADIENT ────────────────────────────────────────── */
+.bg-mesh {
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(255,45,120,0.15), transparent),
+    radial-gradient(ellipse 50% 60% at 80% 80%, rgba(232,180,248,0.12), transparent),
+    radial-gradient(ellipse 70% 40% at 50% 50%, rgba(255,110,180,0.06), transparent),
+    linear-gradient(135deg, #1a0010 0%, #2d0a1e 50%, #1a0010 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ─── EVERYTHING ABOVE GLITTER ───────────────────────────── */
+.site-wrap { position: relative; z-index: 1; }
+
+/* ─── HEADER ─────────────────────────────────────────────── */
+header {
+  position: relative;
+  padding: 50px 30px 40px;
+  text-align: center;
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,45,120,0.18) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.header-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--hot), var(--lilac));
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  padding: 6px 18px;
+  border-radius: 50px;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 20px rgba(255,45,120,0.5);
+  animation: badgePop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes badgePop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+h1 {
+  font-family: var(--script);
+  font-size: clamp(28px, 5vw, 58px);
+  color: var(--white);
+  line-height: 1.1;
+  margin-bottom: 8px;
+  animation: slideDown 0.7s ease both 0.2s;
+  text-shadow:
+    0 0 30px rgba(255,45,120,0.8),
+    0 0 60px rgba(255,45,120,0.4),
+    0 2px 0 rgba(255,110,180,0.5);
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--blush);
+  letter-spacing: 0.06em;
+  animation: slideDown 0.7s ease both 0.35s;
+}
+
+.sparkle-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+  font-size: 20px;
+  animation: slideDown 0.7s ease both 0.5s;
+}
+.sparkle-row span { animation: spin 3s linear infinite; display: inline-block; }
+.sparkle-row span:nth-child(2) { animation-delay: -1s; animation-duration: 4s; }
+.sparkle-row span:nth-child(3) { animation-delay: -2s; animation-duration: 2.5s; }
+@keyframes spin {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.3) rotate(180deg); }
+}
+
+/* ─── TAB BAR ────────────────────────────────────────────── */
+.tab-bar {
+  display: flex;
+  overflow-x: auto;
+  gap: 0;
+  padding: 0 20px;
+  border-bottom: 2px solid rgba(255,110,180,0.2);
+  background: rgba(255,45,120,0.04);
+  scrollbar-width: none;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+
+.tab {
+  position: relative;
+  font-family: var(--fun);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--blush);
+  padding: 14px 20px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.25s;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--pink); }
+.tab.active {
+  color: var(--hot);
+  border-bottom-color: var(--hot);
+  text-shadow: 0 0 12px rgba(255,45,120,0.6);
+}
+.tab .tab-emoji { margin-right: 5px; }
+
+/* ─── PANELS ─────────────────────────────────────────────── */
+.panel { display: none; padding: 36px 28px; max-width: 1100px; margin: 0 auto; }
+.panel.active { display: block; }
+
+/* ─── GLASSMORPHISM CARDS ────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,110,180,0.2);
+  border-radius: 20px;
+  box-shadow:
+    0 8px 32px rgba(255,45,120,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* ─── SECTION TITLES ─────────────────────────────────────── */
+.sec-title {
+  font-family: var(--script);
+  font-size: 30px;
+  color: var(--white);
+  margin-bottom: 6px;
+  text-shadow: 0 0 20px rgba(255,45,120,0.6);
+}
+.sec-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--hot);
+  border: 1px solid rgba(255,45,120,0.4);
+  padding: 3px 12px;
+  border-radius: 50px;
+  margin-bottom: 18px;
+}
+
+.sub-title {
+  font-family: var(--serif);
+  font-size: 17px;
+  color: var(--pink);
+  margin: 22px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sub-title::before {
+  content: '✦';
+  color: var(--gold);
+  font-size: 12px;
+}
+
+/* ─── STEP CARDS ─────────────────────────────────────────── */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+  margin-top: 22px;
+}
+
+.step-card {
+  background: linear-gradient(135deg, rgba(255,45,120,0.06), rgba(232,180,248,0.06));
+  border: 1px solid rgba(255,110,180,0.25);
+  border-radius: 20px;
+  padding: 22px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+  overflow: hidden;
+}
+.step-card::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: conic-gradient(from 0deg, transparent 0%, rgba(255,215,0,0.04) 25%, transparent 50%);
+  animation: shimmer 4s linear infinite;
+  pointer-events: none;
+}
+@keyframes shimmer {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.step-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(255,45,120,0.5);
+  box-shadow: 0 12px 40px rgba(255,45,120,0.2), 0 0 0 1px rgba(255,215,0,0.15);
+}
+.step-card.open {
+  border-color: var(--hot);
+  box-shadow: 0 0 30px rgba(255,45,120,0.25);
+}
+
+.step-num {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.step-card h3 {
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.step-card p {
+  font-size: 12.5px;
+  color: var(--blush);
+  line-height: 1.7;
+}
+.step-expand {
+  display: none;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,110,180,0.2);
+}
+.step-card.open .step-expand { display: block; }
+
+/* ─── ANIM BOX ───────────────────────────────────────────── */
+.anim-box {
+  background: rgba(255,45,120,0.04);
+  border: 1px solid rgba(255,110,180,0.15);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  margin-top: 10px;
+  min-height: 130px;
+}
+
+/* ─── EQ BOX ─────────────────────────────────────────────── */
+.eq-box {
+  background: linear-gradient(135deg, rgba(255,45,120,0.08), rgba(232,180,248,0.06));
+  border-left: 3px solid var(--hot);
+  border: 1px solid rgba(255,110,180,0.25);
+  border-left-width: 3px;
+  padding: 14px 20px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: var(--pink);
+  margin: 14px 0;
+  border-radius: 0 14px 14px 0;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+/* ─── TABLES ─────────────────────────────────────────────── */
+.tbl-wrap {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255,110,180,0.2);
+  margin: 14px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+thead tr {
+  background: linear-gradient(135deg, var(--hot), #d4006b);
+}
+th {
+  font-family: var(--fun);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: white;
+  padding: 11px 14px;
+  text-align: left;
+  text-transform: uppercase;
+}
+td {
+  padding: 9px 14px;
+  border-bottom: 1px solid rgba(255,110,180,0.1);
+  color: var(--blush);
+  font-family: var(--fun);
+}
+tr:nth-child(even) td { background: rgba(255,45,120,0.04); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,45,120,0.06); }
+.val-hot   { color: var(--hot);  font-weight: 700; }
+.val-gold  { color: var(--gold); font-weight: 700; }
+.val-mint  { color: var(--mint); font-weight: 700; }
+.val-lilac { color: var(--lilac); }
+.val-rose  { color: var(--rose); }
+
+/* ─── INFO BOXES ─────────────────────────────────────────── */
+.info-card {
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin: 12px 0;
+  border: 1px solid rgba(255,110,180,0.2);
+  position: relative;
+  overflow: hidden;
+}
+.info-card::after {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,215,0,0.08), transparent 70%);
+}
+.info-card.pink   { background: linear-gradient(135deg, rgba(255,45,120,0.08), rgba(255,110,180,0.04)); }
+.info-card.lilac  { background: linear-gradient(135deg, rgba(232,180,248,0.08), rgba(255,110,180,0.04)); }
+.info-card.gold   { background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,180,100,0.04)); }
+.info-card.mint   { background: linear-gradient(135deg, rgba(184,240,230,0.08), rgba(100,220,200,0.04)); }
+.info-card h4 {
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--white);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.info-card p {
+  font-size: 12.5px;
+  color: var(--blush);
+  line-height: 1.75;
+}
+
+/* ─── COMPARE GRID ───────────────────────────────────────── */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+@media (max-width: 620px) { .compare-grid { grid-template-columns: 1fr; } }
+.compare-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,110,180,0.2);
+  border-radius: 18px;
+  padding: 18px;
+}
+.compare-card h4 {
+  font-family: var(--script);
+  font-size: 18px;
+  color: var(--white);
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,110,180,0.2);
+}
+.cmp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,110,180,0.07);
+  font-size: 11.5px;
+  gap: 8px;
+}
+.cmp-row:last-child { border-bottom: none; }
+.cmp-label { color: rgba(255,179,209,0.6); font-size: 11px; flex: 1; }
+.cmp-theory { color: var(--gold); font-family: monospace; font-size: 11px; }
+.cmp-actual { color: var(--mint); font-family: monospace; font-size: 11px; }
+.delta {
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 50px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.delta-fail { background: rgba(255,45,120,0.2); color: var(--hot); }
+.delta-warn { background: rgba(255,215,0,0.15); color: var(--gold); }
+.delta-ok   { background: rgba(184,240,230,0.15); color: var(--mint); }
+
+/* ─── CHART ──────────────────────────────────────────────── */
+.chart-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,110,180,0.2);
+  border-radius: 18px;
+  padding: 22px;
+  margin-top: 16px;
+}
+.chart-card canvas { max-height: 380px; }
+
+/* ─── DISCUSSION BLOCKS ──────────────────────────────────── */
+.disc-block {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,110,180,0.15);
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+.disc-block:hover { transform: translateX(4px); }
+.disc-block::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  border-radius: 4px 0 0 4px;
+}
+.disc-block.c1::before { background: linear-gradient(180deg, var(--hot), var(--pink)); }
+.disc-block.c2::before { background: linear-gradient(180deg, var(--gold), #ffb347); }
+.disc-block.c3::before { background: linear-gradient(180deg, var(--rose), var(--blush)); }
+.disc-block.c4::before { background: linear-gradient(180deg, var(--mint), #4ecdc4); }
+.disc-block.c5::before { background: linear-gradient(180deg, var(--lilac), #c084fc); }
+.disc-block h4 {
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--white);
+  margin-bottom: 10px;
+}
+.disc-block p {
+  font-size: 12.5px;
+  color: var(--blush);
+  line-height: 1.8;
+  margin-bottom: 6px;
+}
+
+/* ─── FLOATING HEARTS & STARS ────────────────────────────── */
+.floaties {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.floaty {
+  position: absolute;
+  bottom: -30px;
+  font-size: 16px;
+  animation: floatUp linear infinite;
+  opacity: 0;
+}
+@keyframes floatUp {
+  0%   { opacity: 0; transform: translateY(0) rotate(0deg) scale(0.5); }
+  10%  { opacity: 0.7; }
+  90%  { opacity: 0.4; }
+  100% { opacity: 0; transform: translateY(-110vh) rotate(360deg) scale(1.2); }
+}
+
+/* ─── RIBBON TOP ─────────────────────────────────────────── */
+.ribbon {
+  height: 5px;
+  background: linear-gradient(90deg,
+    var(--hot) 0%, var(--pink) 20%, var(--gold) 40%,
+    var(--lilac) 60%, var(--mint) 80%, var(--hot) 100%);
+  background-size: 200% 100%;
+  animation: ribbonMove 3s linear infinite;
+}
+@keyframes ribbonMove {
+  from { background-position: 0% 0%; }
+  to   { background-position: 200% 0%; }
+}
+
+/* ─── TENSIOMETER ANIM ───────────────────────────────────── */
+.plate-dip { animation: dipAnim 3s ease-in-out infinite; }
+@keyframes dipAnim {
+  0%,100% { transform: translateY(0); }
+  45%,55% { transform: translateY(26px); }
+}
+.liq-rise-anim {
+  animation: liqFill 4s ease-in-out infinite;
+  transform-origin: bottom;
+}
+@keyframes liqFill {
+  0%   { transform: scaleY(0.15); opacity: 0.4; }
+  50%  { transform: scaleY(0.8);  opacity: 1;   }
+  100% { transform: scaleY(0.5);  opacity: 0.7; }
+}
+
+/* ─── FADE IN ─────────────────────────────────────────────── */
+.fade { opacity: 0; transform: translateY(14px); transition: all 0.5s ease; }
+.fade.in { opacity: 1; transform: none; }
+
+/* ─── SCROLLBAR ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1a0010; }
+::-webkit-scrollbar-thumb { background: var(--hot); border-radius: 3px; }
+
+/* ─── HIGHLIGHT ───────────────────────────────────────────── */
+.hl { color: var(--hot); font-family: monospace; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<!-- Glitter canvas -->
+<canvas id="glitter"></canvas>
+<div class="bg-mesh"></div>
+<div class="floaties" id="floaties"></div>
+
+<div class="site-wrap">
+<div class="ribbon"></div>
+
+<!-- ══════════ HEADER ══════════ -->
+<header>
+  <div class="header-badge">✨ CHF 440 · Formulation Technology · Honours ✨</div>
+  <h1>Wetting Behaviour of Powders 💅</h1>
+  <p class="subtitle">Washburn Equation · Wilhelmy Plate Tensiometry · Zisman Plot · NMU Gqeberha</p>
+  <div class="sparkle-row">
+    <span>✨</span><span>🌸</span><span>💖</span><span>🌸</span><span>✨</span>
+  </div>
+</header>
+
+<!-- ══════════ TABS ══════════ -->
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab('walkthrough',this)"><span class="tab-emoji">🧪</span>EXPERIMENT WALKTHROUGH</div>
+  <div class="tab" onclick="switchTab('calculations',this)"><span class="tab-emoji">🧮</span>CALCULATIONS</div>
+  <div class="tab" onclick="switchTab('zisman',this)"><span class="tab-emoji">📈</span>ZISMAN PLOT</div>
+  <div class="tab" onclick="switchTab('comparison',this)"><span class="tab-emoji">🔬</span>THEORY vs ACTUAL</div>
+  <div class="tab" onclick="switchTab('discussion',this)"><span class="tab-emoji">💬</span>DISCUSSION</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PANEL 1: WALKTHROUGH
+══════════════════════════════════════ -->
+<div id="walkthrough" class="panel active">
+  <div class="sec-badge">✦ STEP BY STEP ✦</div>
+  <div class="sec-title">The Experiment 🌸</div>
+  <p style="color:var(--blush); font-size:13px; margin-bottom:24px; line-height:1.7;">
+    Click each step card to expand the juicy details ✨
+  </p>
+
+  <div class="steps-grid">
+
+    <!-- STEP 1 -->
+    <div class="step-card" onclick="toggleStep(this)">
+      <div class="step-num">✦ STEP 01 ✦</div>
+      <h3>💧 Sodium Oleate Solutions</h3>
+      <p>Prepare four serial dilutions (0.01 M → 1×10⁻⁵ M) of sodium oleate in distilled water. Allow foam to settle before making up to the mark.</p>
+      <div class="step-expand">
+        <div class="anim-box">
+          <svg viewBox="0 0 280 130" width="280" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="g1" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="#ff2d78" stop-opacity="0.7"/>
+                <stop offset="100%" stop-color="#ffb3d1" stop-opacity="0.1"/>
+              </linearGradient>
+            </defs>
+            <!-- 4 flasks with gradient fills -->
+            <g transform="translate(10,5)">
+              <g transform="translate(10,0)">
+                <rect x="12" y="28" width="28" height="82" rx="3" fill="none" stroke="#ff6eb4" stroke-width="1.5"/>
+                <rect x="18" y="8" width="16" height="24" rx="2" fill="none" stroke="#ff6eb4" stroke-width="1.5"/>
+                <rect x="12" y="70" width="28" height="40" rx="2" fill="url(#g1)"/>
+                <text x="26" y="122" text-anchor="middle" font-family="Quicksand" font-size="8" fill="#ff6eb4" font-weight="700">0.01M</text>
+              </g>
+              <g transform="translate(64,0)">
+                <rect x="12" y="28" width="28" height="82" rx="3" fill="none" stroke="#ff6eb4" stroke-width="1.5"/>
+                <rect x="18" y="8" width="16" height="24" rx="2" fill="none" stroke="#ff6eb4" stroke-width="1.5"/>
+                <rect x="12" y="76" width="28" height="34" rx="2" fill="url(#g1)" opacity="0.8"/>
+                <text x="26" y="122" text-anchor="middle" font-family="Quicksand" font-size="8" fill="#ff6eb4" font-weight="700">0.001</text>
+              </g>
+              <g transform="translate(118,0)">
+                <rect x="12" y="28" width="28" height="82" rx="3" fill="none" stroke="#ff6eb4" stroke-width="1.5"/>
+                <rect x="18" y="8" width="16" height="24" rx="2" fill="none" stroke="#ff6eb4" stroke-width="1.5"/>
+                <rect x="12" y="84" width="28" height="26" rx="2" fill="url(#g1)" opacity="0.6"/>
+                <text x="26" y="122" text-anchor="middle" font-family="Quicksand" font-size="7" fill="#ff6eb4" font-weight="700">0.0001</text>
+              </g>
+              <g transform="translate(172,0)">
+                <rect x="12" y="28" width="28" height="82" rx="3" fill="none" stroke="#ff6eb4" stroke-width="1.5"/>
+                <rect x="18" y="8" width="16" height="24" rx="2" fill="none" stroke="#ff6eb4" stroke-width="1.5"/>
+                <rect x="12" y="92" width="28" height="18" rx="2" fill="url(#g1)" opacity="0.4"/>
+                <text x="26" y="122" text-anchor="middle" font-family="Quicksand" font-size="7" fill="#ff8fab" font-weight="700">1e-5M</text>
+              </g>
+              <text x="56" y="70" fill="#ffd700" font-size="16">→</text>
+              <text x="110" y="70" fill="#ffd700" font-size="16">→</text>
+              <text x="164" y="70" fill="#ffd700" font-size="16">→</text>
+            </g>
+          </svg>
+        </div>
+        <p style="font-size:12px; color:var(--blush); margin-top:10px; line-height:1.7;">
+          🌸 Serial dilution minimises accumulated weighing error. Read the meniscus at the <em>base</em> of the foam — not the fluffy top! 🫧
+        </p>
+      </div>
+    </div>
+
+    <!-- STEP 2: TENSIOMETER -->
+    <div class="step-card" onclick="toggleStep(this)">
+      <div class="step-num">✦ STEP 02 ✦</div>
+      <h3>⚗️ Krüss Tensiometer</h3>
+      <p>The platinum Wilhelmy plate is lowered to contact the liquid. Wetting force is recorded by the microbalance. γ = F / (l · cosθ_plate).</p>
+      <div class="step-expand">
+        <div class="anim-box">
+          <svg viewBox="0 0 220 160" width="220" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="liquidGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ff6eb4" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#ff2d78" stop-opacity="0.2"/>
+              </linearGradient>
+            </defs>
+            <line x1="50" y1="20" x2="170" y2="20" stroke="#ff6eb4" stroke-width="2"/>
+            <line x1="110" y1="10" x2="110" y2="22" stroke="#ff8fab" stroke-width="2"/>
+            <circle cx="110" cy="10" r="4" fill="#ffd700"/>
+            <line x1="110" y1="22" x2="110" y2="50" stroke="#ff8fab" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <g class="plate-dip">
+              <rect x="97" y="50" width="26" height="38" rx="2" fill="none" stroke="#ffd700" stroke-width="2"/>
+              <line x1="101" y1="53" x2="101" y2="85" stroke="rgba(255,215,0,0.3)" stroke-width="0.8"/>
+              <line x1="107" y1="53" x2="107" y2="85" stroke="rgba(255,215,0,0.3)" stroke-width="0.8"/>
+              <line x1="113" y1="53" x2="113" y2="85" stroke="rgba(255,215,0,0.3)" stroke-width="0.8"/>
+              <line x1="119" y1="53" x2="119" y2="85" stroke="rgba(255,215,0,0.3)" stroke-width="0.8"/>
+              <text x="110" y="47" text-anchor="middle" font-size="7" font-family="Quicksand" fill="#ffd700" font-weight="700">Pt PLATE</text>
+            </g>
+            <rect x="60" y="100" width="100" height="46" rx="6" fill="#1a0010" stroke="#ff6eb4" stroke-width="1.5"/>
+            <rect x="60" y="112" width="100" height="34" rx="4" fill="url(#liquidGrad)"/>
+            <rect x="145" y="5" width="56" height="22" rx="6" fill="rgba(255,45,120,0.1)" stroke="#ff6eb4" stroke-width="1"/>
+            <text x="173" y="20" text-anchor="middle" font-family="Quicksand" font-size="8" fill="#ff6eb4" font-weight="700">γ mN/m 💅</text>
+          </svg>
+        </div>
+        <p style="font-size:12px; color:var(--blush); margin-top:10px; line-height:1.7;">
+          ✨ Wilhelmy equation: <span class="hl">F = γ · P · cosθ_plate</span>. For clean platinum θ_plate ≈ 0° so F = γ·P. The Krüss K12 firmware computes γ automatically — love a girl who does the work for you 💁‍♀️
+        </p>
+      </div>
+    </div>
+
+    <!-- STEP 3: POWDER PREP -->
+    <div class="step-card" onclick="toggleStep(this)">
+      <div class="step-num">✦ STEP 03 ✦</div>
+      <h3>🌾 Powder Preparation</h3>
+      <p>Crush each powder (mortar & pestle) to remove aggregates. Pack ~1/3 vial volume onto a filter paper base with consistent tamping force.</p>
+      <div class="step-expand">
+        <div class="anim-box">
+          <svg viewBox="0 0 220 120" width="220" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="58" cy="100" rx="36" ry="8" fill="#2d0a1e" stroke="#ff6eb4" stroke-width="1.5"/>
+            <path d="M 22 68 Q 22 100 58 100 Q 94 100 94 68 Z" fill="#1a0010" stroke="#ff6eb4" stroke-width="1.5"/>
+            <ellipse cx="58" cy="85" rx="22" ry="5" fill="rgba(255,179,209,0.25)"/>
+            <rect x="53" y="18" width="10" height="55" rx="3" fill="#2d0a1e" stroke="#ff8fab" stroke-width="1.2"/>
+            <ellipse cx="58" cy="73" rx="7" ry="3.5" fill="#ff8fab"/>
+            <text x="110" y="72" fill="#ffd700" font-size="18">→</text>
+            <rect x="130" y="15" width="44" height="88" rx="5" fill="none" stroke="#ff6eb4" stroke-width="1.5"/>
+            <rect x="130" y="55" width="44" height="48" rx="4" fill="rgba(255,179,209,0.15)"/>
+            <rect x="126" y="100" width="52" height="5" rx="2" fill="rgba(255,255,255,0.08)" stroke="#ff8fab" stroke-width="0.8"/>
+            <text x="152" y="116" text-anchor="middle" font-family="Quicksand" font-size="7" fill="#ff8fab">filter paper 🌸</text>
+            <text x="152" y="10" text-anchor="middle" font-family="Quicksand" font-size="8" fill="#ffd700" font-weight="700">INVERTED ↓</text>
+          </svg>
+        </div>
+        <p style="font-size:12px; color:var(--blush); margin-top:10px; line-height:1.7;">
+          💖 Consistent packing = consistent C. C is SO sensitive to packing variation — treat your powder bed like your skincare routine: gentle and reproducible! 
+        </p>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step-card" onclick="toggleStep(this)">
+      <div class="step-num">✦ STEP 04 ✦</div>
+      <h3>🧴 Hexane Reference — Find C</h3>
+      <p>Immerse inverted vial in n-hexane (γ=17.9 mN/m) for exactly 60 s. Since θ=0° for hexane, cosθ=1 and C can be solved directly.</p>
+      <div class="step-expand">
+        <div class="anim-box">
+          <svg viewBox="0 0 240 130" width="240" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="hexGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffd700" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#ffd700" stop-opacity="0.05"/>
+              </linearGradient>
+            </defs>
+            <rect x="28" y="88" width="184" height="38" rx="6" fill="#1a0010" stroke="#ffd700" stroke-width="1.5"/>
+            <rect x="28" y="100" width="184" height="26" rx="4" fill="url(#hexGrad)"/>
+            <text x="120" y="118" text-anchor="middle" font-family="Quicksand" font-size="8" fill="#ffd700" font-weight="700">n-HEXANE ✨</text>
+            <rect x="88" y="18" width="64" height="72" rx="5" fill="#1a0010" stroke="#ff6eb4" stroke-width="1.5"/>
+            <rect class="liq-rise-anim" x="88" y="18" width="64" height="72" rx="5" fill="rgba(255,215,0,0.12)" style="transform-origin:120px 90px;"/>
+            <rect x="82" y="87" width="76" height="5" fill="rgba(255,255,255,0.07)" stroke="#ff8fab" stroke-width="0.8"/>
+            <line x1="104" y1="92" x2="104" y2="76" stroke="#ffd700" stroke-width="1" stroke-dasharray="3,2"/>
+            <line x1="120" y1="92" x2="120" y2="76" stroke="#ffd700" stroke-width="1" stroke-dasharray="3,2"/>
+            <line x1="136" y1="92" x2="136" y2="76" stroke="#ffd700" stroke-width="1" stroke-dasharray="3,2"/>
+            <circle cx="198" cy="42" r="22" fill="none" stroke="#ff6eb4" stroke-width="2"/>
+            <line x1="198" y1="42" x2="198" y2="24" stroke="#ff2d78" stroke-width="2"/>
+            <line x1="198" y1="42" x2="214" y2="50" stroke="#ff8fab" stroke-width="1.5"/>
+            <text x="198" y="74" text-anchor="middle" font-family="Quicksand" font-size="8" fill="#ff6eb4" font-weight="700">t = 60s ⏱️</text>
+          </svg>
+        </div>
+        <div class="eq-box">m² = [C · ρ² · γ · cosθ / η] · t</div>
+        <p style="font-size:12px; color:var(--blush); line-height:1.7;">
+          With cosθ = 1: <span class="hl">C = m²·η / (ρ²·γ·t)</span> — this material constant is your powder's personality! 💅
+        </p>
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="step-card" onclick="toggleStep(this)">
+      <div class="step-num">✦ STEP 05 ✦</div>
+      <h3>📐 Contact Angle Calculation</h3>
+      <p>Repeat absorption with each surfactant solution. With C known, solve for cosθ then θ = arccos(cosθ). Four concentrations → four contact angles per powder!</p>
+      <div class="step-expand">
+        <div class="eq-box">cos θ = m² · η / (C · ρ² · γ · t)</div>
+        <p style="font-size:12px; color:var(--blush); margin-top:10px; line-height:1.7;">
+          🌸 Four sodium oleate concentrations → four γ values → four contact angles per powder. Plot them against γ and you get the gorgeous Zisman plot! 📈✨
+        </p>
+      </div>
+    </div>
+
+    <!-- STEP 6 -->
+    <div class="step-card" onclick="toggleStep(this)">
+      <div class="step-num">✦ STEP 06 ✦</div>
+      <h3>📊 Zisman Plot & γ꜀</h3>
+      <p>Plot θ (y) vs. γ (x). Extrapolate the linear fit to θ = 0° — the x-intercept is the critical surface tension γ꜀ of your powder!</p>
+      <div class="step-expand">
+        <div class="anim-box">
+          <svg viewBox="0 0 210 120" width="210" xmlns="http://www.w3.org/2000/svg">
+            <line x1="28" y1="10" x2="28" y2="105" stroke="#ff6eb4" stroke-width="1.5"/>
+            <line x1="28" y1="105" x2="196" y2="105" stroke="#ff6eb4" stroke-width="1.5"/>
+            <line x1="28" y1="55" x2="196" y2="55" stroke="rgba(255,110,180,0.2)" stroke-width="1"/>
+            <text x="110" y="118" text-anchor="middle" font-family="Quicksand" font-size="8" fill="#ff8fab">γ (mN/m)</text>
+            <text x="12" y="62" text-anchor="middle" font-family="Quicksand" font-size="7" fill="#ff8fab" transform="rotate(-90,12,62)">cos θ</text>
+            <line x1="28" y1="38" x2="196" y2="90" stroke="#ff2d78" stroke-width="2" stroke-dasharray="4,2"/>
+            <line x1="28" y1="52" x2="196" y2="78" stroke="#ffd700" stroke-width="2" stroke-dasharray="4,2"/>
+            <circle cx="72" cy="58" r="4.5" fill="#ff2d78"/>
+            <circle cx="76" cy="55" r="4.5" fill="#ff2d78"/>
+            <circle cx="126" cy="68" r="4.5" fill="#ff2d78"/>
+            <circle cx="168" cy="78" r="4.5" fill="#ff2d78"/>
+            <circle cx="72" cy="72" r="4.5" fill="#ffd700"/>
+            <circle cx="76" cy="62" r="4.5" fill="#ffd700"/>
+            <circle cx="126" cy="70" r="4.5" fill="#ffd700"/>
+            <circle cx="168" cy="67" r="4.5" fill="#ffd700"/>
+            <circle cx="32" cy="12" r="3.5" fill="#ff2d78"/>
+            <text x="40" y="16" font-family="Quicksand" font-size="7" fill="#ff2d78">P1 Flour 🌸</text>
+            <circle cx="32" cy="24" r="3.5" fill="#ffd700"/>
+            <text x="40" y="28" font-family="Quicksand" font-size="7" fill="#ffd700">P2 TiO₂/ZnO ✨</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end steps-grid -->
+</div>
+
+<!-- ══════════════════════════════════════
+     PANEL 2: CALCULATIONS
+══════════════════════════════════════ -->
+<div id="calculations" class="panel">
+  <div class="sec-badge">✦ THE MATHS ✦</div>
+  <div class="sec-title">Calculations 🧮💖</div>
+
+  <div class="sub-title">Material Constant C — n-Hexane Reference</div>
+  <p style="color:var(--blush); font-size:12.5px; margin-bottom:12px;">η<sub>hexane</sub> = 0.300 mPa·s &nbsp;·&nbsp; ρ = 0.659 g/mL &nbsp;·&nbsp; γ = 17.900 mN/m &nbsp;·&nbsp; cosθ = 1 &nbsp;·&nbsp; t = 60 s</p>
+  <div class="eq-box">C = m² · η &nbsp;/&nbsp; ( ρ² · γ · cosθ · t )</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Powder 💅</th><th>Type</th><th>t (s)</th><th>Δm (g)</th><th>m² (g²)</th><th>C (mL²/m)</th></tr></thead>
+      <tbody>
+        <tr><td class="val-hot">Powder 1</td><td>Rice/Potato Flour 🌾</td><td>60</td><td>1.24</td><td class="val-gold">1.5376</td><td class="val-mint">9.89 × 10⁻⁴</td></tr>
+        <tr><td class="val-lilac">Powder 2</td><td>TiO₂ / ZnO ✨</td><td>60</td><td>1.07</td><td class="val-gold">1.1449</td><td class="val-mint">7.36 × 10⁻⁴</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sub-title">Tensiometry — Sodium Oleate Surface Tensions</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Conc (M)</th><th>γ (mN/m)</th><th>Temp (°C)</th><th>Δm P1 (g)</th><th>Δm P2 (g)</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>0.01</td><td class="val-hot">25.0</td><td>25.4</td><td>0.54</td><td>0.38</td></tr>
+        <tr><td>2</td><td>0.001</td><td class="val-hot">25.9</td><td>25.2</td><td>0.61</td><td>0.60</td></tr>
+        <tr><td>3</td><td>0.0001</td><td class="val-hot">37.6</td><td>25.1</td><td>0.65</td><td>0.51</td></tr>
+        <tr><td>4</td><td>1×10⁻⁵</td><td class="val-hot">48.8</td><td>25.0</td><td>0.52</td><td>0.76</td></tr>
+        <tr><td>—</td><td>Water 💧 (ref)</td><td class="val-gold">60.5</td><td>25.0</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sub-title">Calculated Contact Angles θ</div>
+  <div class="eq-box">cosθ = m² · η &nbsp;/&nbsp; (C · ρ² · γ · t) &nbsp;→&nbsp; θ = arccos(cosθ)</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Conc (M)</th><th>γ (mN/m)</th><th>cosθ P1</th><th>θ P1 (°)</th><th>cosθ P2</th><th>θ P2 (°)</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>0.01</td><td>25.0</td><td>0.1966</td><td class="val-hot">78.7°</td><td>0.1307</td><td class="val-gold">82.5°</td></tr>
+        <tr><td>2</td><td>0.001</td><td>25.9</td><td>0.2421</td><td class="val-hot">76.0°</td><td>0.3146</td><td class="val-gold">71.7°</td></tr>
+        <tr><td>3</td><td>0.0001</td><td>37.6</td><td>0.1894</td><td class="val-hot">79.1°</td><td>0.1566</td><td class="val-gold">81.0°</td></tr>
+        <tr><td>4</td><td>1×10⁻⁵</td><td>48.8</td><td>0.0934</td><td class="val-hot">84.6°</td><td>0.2679</td><td class="val-gold">74.5°</td></tr>
+        <tr><td>—</td><td><strong>Mean ✨</strong></td><td>—</td><td><strong>0.180</strong></td><td class="val-mint"><strong>79.6°</strong></td><td><strong>0.215</strong></td><td class="val-mint"><strong>77.4°</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="info-card pink">
+    <h4>💅 Worked Example — Powder 1, Solution 1 (0.01 M, γ = 25.0 mN/m)</h4>
+    <p>cosθ = (0.54)² × 1.00 / (9.89×10⁻⁴ × 1.00² × 25.0 × 60) = 0.2916 / 1.4835 = <strong style="color:var(--hot)">0.1966</strong><br>
+    θ = arccos(0.1966) = <strong style="color:var(--hot)">78.7°</strong> → Partial wetting (approaching the 90° boundary 🌸)</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PANEL 3: ZISMAN PLOT
+══════════════════════════════════════ -->
+<div id="zisman" class="panel">
+  <div class="sec-badge">✦ ZISMAN ANALYSIS ✦</div>
+  <div class="sec-title">Zisman Plot 📈✨</div>
+
+  <p style="color:var(--blush); font-size:12.5px; margin-bottom:16px; line-height:1.7;">
+    cos θ plotted against surface tension γ for both powders. The linear regression is extrapolated to cosθ = 1 (θ = 0°) to find γ꜀. Filled markers = data, dashed lines = linear fit.
+  </p>
+
+  <div class="chart-card">
+    <canvas id="zismanChart"></canvas>
+    <div style="display:flex; gap:20px; justify-content:center; margin-top:14px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:6px; font-size:11px; color:var(--blush);">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--hot);"></div> Powder 1 (Flour) — data
+      </div>
+      <div style="display:flex; align-items:center; gap:6px; font-size:11px; color:var(--blush);">
+        <div style="width:12px;height:3px;background:var(--hot);border-radius:2px;"></div> Powder 1 — fit
+      </div>
+      <div style="display:flex; align-items:center; gap:6px; font-size:11px; color:var(--blush);">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--gold);"></div> Powder 2 (TiO₂/ZnO) — data
+      </div>
+      <div style="display:flex; align-items:center; gap:6px; font-size:11px; color:var(--blush);">
+        <div style="width:12px;height:3px;background:var(--gold);border-radius:2px;"></div> Powder 2 — fit
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:18px;">
+    <div class="info-card pink">
+      <h4>🌸 Powder 1 — Flour</h4>
+      <p style="font-family:monospace; font-size:11.5px;">cosθ = −0.00503·γ + 0.3529<br>R² = 0.63<br><span style="color:var(--rose);">γ꜀ = −128.7 mN/m ← non-physical! 😱</span></p>
+    </div>
+    <div class="info-card gold">
+      <h4>✨ Powder 2 — TiO₂/ZnO</h4>
+      <p style="font-family:monospace; font-size:11.5px;">cosθ = +0.00138·γ + 0.1702<br>R² = 0.06<br><span style="color:var(--rose);">γ꜀ = +602.5 mN/m ← also non-physical 😳</span></p>
+    </div>
+  </div>
+
+  <div class="info-card lilac" style="margin-top:12px;">
+    <h4>💜 Why is γ꜀ non-physical?</h4>
+    <p>A negative γ꜀ (P1) and a value exceeding mercury's surface tension ~485 mN/m (P2) both indicate the data doesn't have the required monotonic trend for a valid Zisman extrapolation. The tested γ range was too narrow (25–49 mN/m) and confined to one liquid family (surfactant-water). The Owens–Wendt probe set would fix this! 🔬</p>
+  </div>
+
+  <div class="sub-title">θ vs γ Plot (Contact Angle Representation)</div>
+  <div class="chart-card">
+    <canvas id="thetaChart"></canvas>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PANEL 4: THEORY vs ACTUAL
+══════════════════════════════════════ -->
+<div id="comparison" class="panel">
+  <div class="sec-badge">✦ THEORY vs REALITY ✦</div>
+  <div class="sec-title">Theory vs. Actual Results 🔬💖</div>
+  <p style="color:var(--blush); font-size:12.5px; margin-bottom:18px;">Literature: Binks (2002), Evonik Aeroxide TiO₂ T 805 TDS, Holmberg et al. (2003), Marmur (2003)</p>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h4>🌾 Powder 1 — Rice/Potato Flour</h4>
+      <div class="cmp-row"><span class="cmp-label">γ꜀ Literature</span><span class="cmp-theory">30–36 mN/m</span></div>
+      <div class="cmp-row"><span class="cmp-label">γ꜀ Experimental</span><span class="cmp-actual">Non-determinable</span><span class="delta delta-fail">✗ FAIL</span></div>
+      <div class="cmp-row"><span class="cmp-label">θ with water (lit.)</span><span class="cmp-theory">~50–60°</span></div>
+      <div class="cmp-row"><span class="cmp-label">θ at γ=25 mN/m (theory)</span><span class="cmp-theory">~20–35°</span></div>
+      <div class="cmp-row"><span class="cmp-label">θ at γ=25 mN/m (actual)</span><span class="cmp-actual">78.7°</span><span class="delta delta-fail">Δ ~45°</span></div>
+      <div class="cmp-row"><span class="cmp-label">θ at γ=48.8 mN/m (theory)</span><span class="cmp-theory">~55–65°</span></div>
+      <div class="cmp-row"><span class="cmp-label">θ at γ=48.8 mN/m (actual)</span><span class="cmp-actual">84.6°</span><span class="delta delta-warn">Δ ~25°</span></div>
+      <div class="cmp-row"><span class="cmp-label">Wettability class</span><span class="cmp-theory">Moderate</span><span class="delta delta-fail">MISMATCH</span></div>
+    </div>
+
+    <div class="compare-card">
+      <h4>✨ Powder 2 — TiO₂ / ZnO</h4>
+      <div class="cmp-row"><span class="cmp-label">γ꜀ TiO₂ (Literature)</span><span class="cmp-theory">40–55 mN/m</span></div>
+      <div class="cmp-row"><span class="cmp-label">γ꜀ ZnO (Literature)</span><span class="cmp-theory">35–47 mN/m</span></div>
+      <div class="cmp-row"><span class="cmp-label">γ꜀ Experimental</span><span class="cmp-actual">Non-determinable</span><span class="delta delta-fail">✗ FAIL</span></div>
+      <div class="cmp-row"><span class="cmp-label">θ at γ=25 mN/m (theory)</span><span class="cmp-theory">~5–20°</span></div>
+      <div class="cmp-row"><span class="cmp-label">θ at γ=25 mN/m (actual)</span><span class="cmp-actual">82.5°</span><span class="delta delta-fail">Δ ~70°</span></div>
+      <div class="cmp-row"><span class="cmp-label">Zisman trend</span><span class="cmp-theory">Decreasing</span></div>
+      <div class="cmp-row"><span class="cmp-label">Actual trend</span><span class="cmp-actual">Non-monotonic</span><span class="delta delta-fail">UNEXPECTED</span></div>
+      <div class="cmp-row"><span class="cmp-label">Wettability class</span><span class="cmp-theory">Good (uncoated)</span><span class="delta delta-fail">MISMATCH</span></div>
+    </div>
+  </div>
+
+  <div class="sub-title">Which Powder Has Better Wettability? 💅</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Metric</th><th>Powder 1 (Flour) 🌾</th><th>Powder 2 (TiO₂/ZnO) ✨</th><th>Winner 🏆</th></tr></thead>
+      <tbody>
+        <tr><td>Mean θ (all 4 solutions)</td><td class="val-hot">79.6°</td><td class="val-gold">77.4°</td><td class="val-mint">P2 (lower θ) 🏆</td></tr>
+        <tr><td>Mean cosθ</td><td class="val-hot">0.180</td><td class="val-gold">0.215</td><td class="val-mint">P2 (higher cosθ) 🏆</td></tr>
+        <tr><td>C value (porosity)</td><td class="val-hot">9.89×10⁻⁴</td><td class="val-gold">7.36×10⁻⁴</td><td class="val-lilac">P1 (more porous)</td></tr>
+        <tr><td>Hexane absorption</td><td class="val-hot">1.24 g</td><td class="val-gold">1.07 g</td><td class="val-lilac">P1 (absorbs more)</td></tr>
+        <tr><td>Zisman trend consistency</td><td class="val-hot">Weak negative slope</td><td class="val-rose">No clear trend</td><td class="val-lilac">P1 (marginally)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PANEL 5: DISCUSSION
+══════════════════════════════════════ -->
+<div id="discussion" class="panel">
+  <div class="sec-badge">✦ LET'S TALK ABOUT IT ✦</div>
+  <div class="sec-title">Discussion 💬🌸</div>
+
+  <div class="disc-block c1 fade">
+    <h4>💖 Finding 1 — Why Are All Contact Angles So High? (71°–85°)</h4>
+    <p>Both powders show contact angles far exceeding theoretical predictions. Literature predicts θ ≈ 50–60° for native starch and θ ≈ 20–40° for uncoated TiO₂/ZnO with surfactant solutions.</p>
+    <p>The most likely culprit is <strong style="color:var(--hot)">surface hydrophobisation</strong>. Cosmetic-grade TiO₂ and ZnO are routinely coated with dimethicone, stearic acid, or alumina — Evonik Aeroxide T 805 gives θ ≈ 95–130° with water! For flour, lipid and protein surface layers on starch granules increase hydrophobicity vs. pure starch (Holmberg et al., 2003).</p>
+  </div>
+
+  <div class="disc-block c2 fade">
+    <h4>✨ Finding 2 — Why Did the Zisman Extrapolation Fail?</h4>
+    <p>A valid Zisman analysis requires: (a) monotonic decrease in cosθ as γ increases; (b) a linear trend; (c) data that brackets cosθ = 1. All three failed here.</p>
+    <p>The γ range tested was narrow (25–49 mN/m) and confined to one liquid family. The Owens–Wendt probe set — n-hexane (17.9), diiodomethane (50.8), formamide (57.0), water (72.8 mN/m) — would independently probe dispersive and polar surface energy components for a valid extrapolation (Owens & Wendt, 1969).</p>
+  </div>
+
+  <div class="disc-block c3 fade">
+    <h4>🌸 Finding 3 — Material Constant C & Packing Error</h4>
+    <p>C encodes powder bed porosity and pore tortuosity. The error in cosθ due to C variation scales as <span class="hl">Δcosθ ∝ ΔC/(C·sinθ)</span> — which diverges as θ → 90°, exactly where our data sits. For Powder 2 (TiO₂/ZnO), denser particle packing is harder to reproduce manually, explaining the non-monotonic scatter. A calibrated compression ram would fix this!</p>
+  </div>
+
+  <div class="disc-block c4 fade">
+    <h4>💚 Finding 4 — Dynamic Adsorption of Sodium Oleate</h4>
+    <p>Sodium oleate adsorbs onto TiO₂ and ZnO surfaces via carboxylate–metal coordination within seconds. The θ measured at t = 60 s is an average over an evolving adsorption process, not a true equilibrium value. This dynamic effect is most pronounced for P2 at high concentrations (0.01 M) where adsorption is fastest — contributing to the non-monotonic scatter we see.</p>
+  </div>
+
+  <div class="disc-block c5 fade">
+    <h4>💜 Finding 5 — Cosmetic Formulation Relevance (This Is Our World! 💅)</h4>
+    <p>In a colour-changing foundation system (e.g., Tagra CameleonCaps™ in an O/W base), pigment wettability governs dispersion stability and colour development. The finding that θ > 70° for TiO₂/ZnO in aqueous media confirms that <strong style="color:var(--lilac)">sodium oleate alone is insufficient</strong> as a wetting agent for cosmetic-grade inorganic pigments.</p>
+    <p>For an O/W emulsion, a mixed system of <strong style="color:var(--mint)">polysorbate 60</strong> (steric stabilisation) + <strong style="color:var(--mint)">sodium lauryl sulfate</strong> (electrostatic stabilisation) would provide superior wettability while maintaining Tagra shell integrity below 40°C. Science meets skincare! ✨🌸</p>
+  </div>
+
+  <div class="info-card gold" style="margin-top:20px;">
+    <h4>📚 References</h4>
+    <p style="line-height:2;">
+      1. Washburn, E.W. (1921) <em>Phys. Rev.</em> 17, 273–283 &nbsp;·&nbsp;
+      2. Zisman, W.A. (1964) <em>Adv. Chem. Ser.</em> 43, 1–51 &nbsp;·&nbsp;
+      3. Owens, D.K. & Wendt, R.C. (1969) <em>J. Appl. Polym. Sci.</em> 13, 1741–1747 &nbsp;·&nbsp;
+      4. Binks, B.P. (2002) <em>Curr. Opin. Colloid Interface Sci.</em> 7, 21–41 &nbsp;·&nbsp;
+      5. Holmberg, K. et al. (2003) <em>Surfactants & Polymers in Aqueous Solution</em>, Wiley &nbsp;·&nbsp;
+      6. Evonik Aeroxide TiO₂ T 805 TDS (2020)
+    </p>
+  </div>
+</div><!-- end discussion panel -->
+
+</div><!-- end site-wrap -->
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+// ─── GLITTER CANVAS ────────────────────────────────────────
+const glCanvas = document.getElementById('glitter');
+const gl = glCanvas.getContext('2d');
+let W2, H2, particles = [];
+
+function resize() {
+  W2 = glCanvas.width  = window.innerWidth;
+  H2 = glCanvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const COLORS = ['#ff2d78','#ff6eb4','#ffd700','#ffb3d1','#e8b4f8','#b8f0e6','#ffffff'];
+
+function Particle() {
+  this.reset = function() {
+    this.x = Math.random() * W2;
+    this.y = Math.random() * H2;
+    this.size = Math.random() * 2.5 + 0.5;
+    this.speedY = Math.random() * 0.4 + 0.1;
+    this.speedX = (Math.random() - 0.5) * 0.3;
+    this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    this.alpha = Math.random() * 0.8 + 0.2;
+    this.decay = Math.random() * 0.003 + 0.001;
+    this.twinkle = Math.random() * Math.PI * 2;
+    this.twinkleSpeed = Math.random() * 0.05 + 0.02;
+    this.shape = Math.random() > 0.6 ? 'star' : 'circle';
+  };
+  this.reset();
+  this.y = Math.random() * H2;
+}
+
+for (let i = 0; i < 180; i++) particles.push(new Particle());
+
+function drawStar(ctx, x, y, r, color, alpha) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  for (let i = 0; i < 5; i++) {
+    const a = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+    const b = (i * 4 * Math.PI) / 5 + (2 * Math.PI) / 5 - Math.PI / 2;
+    ctx.lineTo(x + r * Math.cos(a), y + r * Math.sin(a));
+    ctx.lineTo(x + r * 0.4 * Math.cos(b), y + r * 0.4 * Math.sin(b));
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function animGlitter() {
+  gl.clearRect(0, 0, W2, H2);
+  particles.forEach(p => {
+    p.twinkle += p.twinkleSpeed;
+    const alpha = p.alpha * (0.5 + 0.5 * Math.sin(p.twinkle));
+    if (p.shape === 'star') {
+      drawStar(gl, p.x, p.y, p.size * 1.5, p.color, alpha);
+    } else {
+      gl.save();
+      gl.globalAlpha = alpha;
+      gl.fillStyle = p.color;
+      gl.shadowBlur = p.size * 3;
+      gl.shadowColor = p.color;
+      gl.beginPath();
+      gl.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      gl.fill();
+      gl.restore();
+    }
+    p.y -= p.speedY;
+    p.x += p.speedX;
+    if (p.y < -10 || p.x < -10 || p.x > W2 + 10) p.reset();
+  });
+  requestAnimationFrame(animGlitter);
+}
+animGlitter();
+
+// ─── MOUSE SPARKLE BURST ───────────────────────────────────
+document.addEventListener('click', e => {
+  for (let i = 0; i < 12; i++) {
+    const p = new Particle();
+    p.x = e.clientX;
+    p.y = e.clientY;
+    p.speedX = (Math.random() - 0.5) * 4;
+    p.speedY = -(Math.random() * 4 + 1);
+    p.size = Math.random() * 3 + 1;
+    p.alpha = 1;
+    particles.push(p);
+  }
+  if (particles.length > 300) particles.splice(0, 12);
+});
+
+// ─── FLOATING EMOJIS ──────────────────────────────────────
+const emojis = ['🌸','💖','✨','💅','🌷','💫','⭐','🩷','🎀','💎','🌺','🦋'];
+const floaties = document.getElementById('floaties');
+function spawnFloat() {
+  const el = document.createElement('div');
+  el.className = 'floaty';
+  el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+  el.style.left = Math.random() * 100 + 'vw';
+  el.style.animationDuration = (8 + Math.random() * 10) + 's';
+  el.style.animationDelay = (Math.random() * 2) + 's';
+  el.style.fontSize = (12 + Math.random() * 14) + 'px';
+  floaties.appendChild(el);
+  setTimeout(() => el.remove(), 20000);
+}
+setInterval(spawnFloat, 1800);
+
+// ─── TAB SWITCHING ─────────────────────────────────────────
+function switchTab(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  if (id === 'zisman') setTimeout(initCharts, 80);
+  setTimeout(triggerFades, 100);
+}
+
+// ─── STEP TOGGLE ───────────────────────────────────────────
+function toggleStep(card) {
+  const wasOpen = card.classList.contains('open');
+  document.querySelectorAll('.step-card.open').forEach(c => c.classList.remove('open'));
+  if (!wasOpen) card.classList.add('open');
+}
+
+// ─── FADE IN ───────────────────────────────────────────────
+function triggerFades() {
+  document.querySelectorAll('.fade:not(.in)').forEach((el, i) => {
+    setTimeout(() => el.classList.add('in'), i * 100);
+  });
+}
+triggerFades();
+
+// ─── CHARTS ────────────────────────────────────────────────
+let chartsReady = false;
+function initCharts() {
+  if (chartsReady) return;
+  chartsReady = true;
+
+  const gamma  = [25.0, 25.9, 37.6, 48.8];
+  const cosP1  = [0.1966, 0.2421, 0.1894, 0.0934];
+  const cosP2  = [0.1307, 0.3146, 0.1566, 0.2679];
+  const tP1    = [78.7, 76.0, 79.1, 84.6];
+  const tP2    = [82.5, 71.7, 81.0, 74.5];
+  const fitX   = [18, 55];
+  const fitY1  = fitX.map(x => -0.00503*x + 0.3529);
+  const fitY2  = fitX.map(x =>  0.00138*x + 0.1702);
+
+  const gridColor  = 'rgba(255,110,180,0.12)';
+  const tickColor  = 'rgba(255,179,209,0.6)';
+  const fontFam    = "'Quicksand', sans-serif";
+
+  Chart.defaults.color = tickColor;
+  Chart.defaults.font.family = fontFam;
+
+  // ZISMAN (cosθ vs γ)
+  new Chart(document.getElementById('zismanChart'), {
+    type: 'scatter',
+    data: {
+      datasets: [
+        { label:'P1 — data', data: gamma.map((g,i)=>({x:g,y:cosP1[i]})),
+          backgroundColor:'#ff2d78', pointRadius:8, pointHoverRadius:11,
+          pointStyle:'circle' },
+        { label:'P1 — fit',
+          data: fitX.map((x,i)=>({x,y:fitY1[i]})), type:'line',
+          borderColor:'rgba(255,45,120,0.5)', borderWidth:1.5,
+          borderDash:[5,4], pointRadius:0, fill:false },
+        { label:'P2 — data', data: gamma.map((g,i)=>({x:g,y:cosP2[i]})),
+          backgroundColor:'#ffd700', pointRadius:8, pointHoverRadius:11,
+          pointStyle:'rectRot' },
+        { label:'P2 — fit',
+          data: fitX.map((x,i)=>({x,y:fitY2[i]})), type:'line',
+          borderColor:'rgba(255,215,0,0.5)', borderWidth:1.5,
+          borderDash:[5,4], pointRadius:0, fill:false },
+        { label:'cosθ = 1 (γc)',
+          data:[{x:18,y:1},{x:55,y:1}], type:'line',
+          borderColor:'rgba(232,180,248,0.4)', borderWidth:1,
+          borderDash:[2,4], pointRadius:0, fill:false },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:true,
+      plugins:{
+        legend:{ labels:{ color:tickColor, boxWidth:10, font:{family:fontFam,size:11} } },
+        tooltip:{ backgroundColor:'#2d0a1e', borderColor:'rgba(255,45,120,0.4)',
+          borderWidth:1, titleColor:'#ff2d78', bodyColor:'#ffb3d1',
+          callbacks:{ label: ctx=>`γ=${ctx.parsed.x} mN/m, cosθ=${ctx.parsed.y.toFixed(4)}` } }
+      },
+      scales:{
+        x:{ title:{display:true,text:'Surface Tension γ (mN/m)',color:tickColor,font:{family:fontFam,size:11}},
+            grid:{color:gridColor}, ticks:{color:tickColor,font:{family:fontFam,size:10}}, min:18, max:55 },
+        y:{ title:{display:true,text:'cos θ',color:tickColor,font:{family:fontFam,size:11}},
+            grid:{color:gridColor}, ticks:{color:tickColor,font:{family:fontFam,size:10}}, min:0, max:1.1 }
+      }
+    }
+  });
+
+  // θ vs γ
+  new Chart(document.getElementById('thetaChart'), {
+    type: 'scatter',
+    data: {
+      datasets: [
+        { label:'P1 θ (Flour)', data: gamma.map((g,i)=>({x:g,y:tP1[i]})),
+          backgroundColor:'#ff2d78', pointRadius:8, pointHoverRadius:11 },
+        { label:'P2 θ (TiO₂/ZnO)', data: gamma.map((g,i)=>({x:g,y:tP2[i]})),
+          backgroundColor:'#ffd700', pointRadius:8, pointHoverRadius:11, pointStyle:'rectRot' },
+      ]
+    },
+    options: {
+      responsive:true,
+      plugins:{
+        legend:{ labels:{ color:tickColor, boxWidth:10, font:{family:fontFam,size:11} } },
+        tooltip:{ backgroundColor:'#2d0a1e', borderColor:'rgba(255,45,120,0.4)', borderWidth:1,
+          titleColor:'#ff2d78', bodyColor:'#ffb3d1',
+          callbacks:{ label: ctx=>`γ=${ctx.parsed.x} mN/m, θ=${ctx.parsed.y.toFixed(1)}°` } }
+      },
+      scales:{
+        x:{ title:{display:true,text:'Surface Tension γ (mN/m)',color:tickColor,font:{family:fontFam,size:11}},
+            grid:{color:gridColor}, ticks:{color:tickColor,font:{family:fontFam,size:10}}, min:20, max:55 },
+        y:{ title:{display:true,text:'Contact Angle θ (°)',color:tickColor,font:{family:fontFam,size:11}},
+            grid:{color:gridColor}, ticks:{color:tickColor,font:{family:fontFam,size:10}}, min:60, max:92 }
+      }
+    }
+  });
+}
+
+// open first card on load
+document.querySelector('.step-card').classList.add('open');
+</script>
+</body>
+</html>
